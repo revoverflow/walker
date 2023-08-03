@@ -57,14 +57,14 @@ std::vector<ScannerField> StructureParser::parse() {
                 continue;
             }
 
-            void* valuePtr = ScanUtils::castAsPrimitiveType(value, primitive);
+            void* valuePtr = nullptr;
+            if (!value.empty()) valuePtr = ScanUtils::castAsPrimitiveType(value, primitive);
 
             ScannerCriteria c = {
                     .type = criteriaType,
                     .value = valuePtr
             };
 
-            printf("adding criteria: %d\n", c.type);
             criteriaList.push_back(c);
         }
 

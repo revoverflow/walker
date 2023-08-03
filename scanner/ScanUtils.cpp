@@ -5,7 +5,6 @@ bool ScanUtils::matchesField(void *buffer, ScannerField field) {
     bool matches = true;
 
     for (const auto& criteria : field.criterias) {
-        printf("checking criteria: %d\n", criteria.type);
         matches &= ScanUtils::matchesCriteria(buffer, criteria, primitive);
         if (!matches) break;
     }
