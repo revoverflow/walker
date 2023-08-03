@@ -1,15 +1,12 @@
 #include "Scanner.h"
 
 Scanner::Scanner() {
-    buffer = NULL;
+    buffer = nullptr;
     fields = std::vector<ScannerField>{};
 }
 
 Scanner::~Scanner() {
-    if (buffer != NULL) {
-        delete[] buffer;
-    }
-
+    delete[] buffer;
     fields.clear();
 }
 
@@ -54,3 +51,18 @@ void Scanner::setFields(std::vector<ScannerField> inputFields) {
     this->fields = std::move(inputFields);
 }
 
+void Scanner::saveResults(const std::vector<ScannerResult>& results, const std::string& filename) {
+    std::ofstream file(filename, std::ios::binary);
+
+    file << "~ walker scan results ~" << std::endl;
+    file << "found " << results.size() << " results" << std::endl;
+    file << "------------------------" << std::endl;
+
+    for (ScannerResult result : results) {
+        file << "0x" << std::hex << result.offset << std::endl;
+    }
+
+    file << "------------------------" << std::endl;
+
+    file.close();
+}

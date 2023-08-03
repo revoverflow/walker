@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstring>
 #include <utility>
+#include <fstream>
 
 #include "ScanUtils.h"
 
@@ -20,10 +21,12 @@ public:
     void setBuffer(char* inputBuffer, size_t bufferSize);
 
     std::vector<ScannerResult> scan();
+
+    static void saveResults(const std::vector<ScannerResult>& results, const std::string& filename);
 private:
     std::vector<ScannerField> fields;
 
-    size_t bufferSize;
+    size_t bufferSize{};
     char* buffer;
 };
 

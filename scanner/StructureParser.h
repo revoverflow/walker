@@ -9,10 +9,8 @@
 
 class StructureParser {
 public:
-    explicit StructureParser(char* filename);
-    ~StructureParser();
-
+    explicit StructureParser(std::string filename);
     std::vector<ScannerField> parse();
 private:
-    char* filename;
+    std::string filename;
 };

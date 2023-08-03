@@ -1,13 +1,11 @@
 #include "StructureParser.h"
 
+#include <utility>
+
 using json = nlohmann::json;
 
-StructureParser::StructureParser(char *filename) {
-    this->filename = filename;
-}
-
-StructureParser::~StructureParser() {
-    filename = nullptr;
+StructureParser::StructureParser(std::string filename) {
+    this->filename = std::move(filename);
 }
 
 std::vector<ScannerField> StructureParser::parse() {
@@ -15,7 +13,7 @@ std::vector<ScannerField> StructureParser::parse() {
     std::vector<ScannerField> fields{};
 
     if (!file.is_open()) {
-        printf("Failed to open file: %s\n", filename);
+        printf("Failed to open file: %s\n", filename.c_str());
         return fields;
     }
 
