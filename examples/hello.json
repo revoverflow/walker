@@ -1,0 +1,27 @@
+[
+  {
+    "type": "uint8",
+    "criteria": "=",
+    "value": 104
+  },
+  {
+    "type": "uint8",
+    "criteria": "=",
+    "value": 101
+  },
+  {
+    "type": "uint8",
+    "criteria": "=",
+    "value": 108
+  },
+  {
+    "type": "uint8",
+    "criteria": "=",
+    "value": 108
+  },
+  {
+    "type": "uint8",
+    "criteria": "=",
+    "value": 111
+  }
+]

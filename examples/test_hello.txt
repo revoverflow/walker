@@ -1,0 +1,3 @@
+The program should detect all "hello" but not "Hello" because it's case sensitive.
+This hello is an example of hello, but not this one: HEllo
+hello.json contains the definition for the structure.
