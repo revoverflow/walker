@@ -24,8 +24,6 @@ bool ScanUtils::matchesField(void *buffer, ScannerField field) {
             return CriteriaMatcher<float>::numeric(*(float*) buffer, field.criteria);
         case SCANNER_PRIMITIVE_DOUBLE:
             return CriteriaMatcher<double>::numeric(*(double*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_STRING:
-            return false;
         case SCANNER_PRIMITIVE_POINTER:
             return false;
         case SCANNER_PRIMITIVE_NONE:
