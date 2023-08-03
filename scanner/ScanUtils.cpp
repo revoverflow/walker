@@ -107,7 +107,7 @@ bool ScanUtils::matchesCriteria(void *buffer, ScannerCriteria criteria, ScannerP
         case SCANNER_PRIMITIVE_DOUBLE:
             return CriteriaMatcher<double>::numeric(*(double*) buffer, criteria);
         case SCANNER_PRIMITIVE_POINTER:
-            return false;
+            return CriteriaMatcher<uintptr_t>::pointer(*(uintptr_t*) buffer, criteria);
         case SCANNER_PRIMITIVE_NONE:
             break;
     }

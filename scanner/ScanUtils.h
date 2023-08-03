@@ -143,9 +143,9 @@ struct CriteriaMatcher {
             case SCANNER_CRITERIA_EQUAL:
                 return value == *(T*) criteria.value;
             case SCANNER_CRITERIA_PTR_NOTNULL:
-                return value != nullptr;
+                return value != (T) nullptr;
             case SCANNER_CRITERIA_PTR_NULL:
-                return value == nullptr;
+                return value == (T) nullptr;
             case SCANNER_CRITERIA_ANY:
                 return true;
             default:
