@@ -27,3 +27,43 @@ The following criteria are supported:
 - `nullptr`: The field must be a null pointer
 - `notnullptr`: The field must not be a null pointer
 - `any`: The field can be any value
+
+### Example
+
+Here is an example structure definition file that searches for a structure that contains a `uint32` field that is equal to `1337`, a pointer that is not null and a `uint8` field that can be any value.
+
+```json
+[
+    {
+        "type": "uint32",
+        "criterias": [
+            {
+                "type": "eq",
+                "value": 1337
+            }
+        ]
+    },
+    {
+        "type": "pointer",
+        "criterias": [
+            {
+                "type": "notnullptr"
+            }
+        ]
+    },
+    {
+        "type": "uint8",
+        "criterias": [
+            {
+                "type": "any"
+            }
+        ]
+    }
+]
+```
+
+To run this example, you can use the following command:
+
+```bash
+walker -f example.bin -s example.json -o example_output.txt
+```
