@@ -22,35 +22,56 @@ std::vector<ScannerField> StructureParser::parse() {
     // start parsing
     for (json::iterator it = data.begin(); it != data.end(); ++it) {
         json field = it.value();
-        bool isValueSet = true;
 
         std::string type = field["type"];
-        std::string criteria = field["criteria"];
-        json value = field["value"];
+        json criterias = field["criterias"];
 
-        if (value.empty()) {
-            isValueSet = false;
+        if (criterias.empty()) {
+            printf("No criteria set for field: %s, ignoring field.\n", type.c_str());
+            continue;
+        } else if (!criterias.is_array()) {
+            printf("Invalid criteria type for field: %s, ignoring field.\n", type.c_str());
+            continue;
         }
 
+
         ScannerPrimitive primitive = ScanUtils::getPrimitiveByName(type);
-        ScannerCriteriaType criteriaType = ScanUtils::getCriteriaByName(criteria, isValueSet);
 
         if (primitive == SCANNER_PRIMITIVE_NONE) {
             printf("Invalid primitive type: %s, ignoring field.\n", type.c_str());
             continue;
         }
 
-        void* valuePtr = ScanUtils::castAsPrimitiveType(value, primitive);
+        std::vector<ScannerCriteria> criteriaList{};
 
-        ScannerField c = {
-            .primitive = primitive,
-            .criteria = {
-                .type = criteriaType,
-                .value = valuePtr
+        for(json::iterator itc = criterias.begin(); itc != criterias.end(); ++itc) {
+            json criteria = itc.value();
+
+            std::string name = criteria["type"];
+            json value = criteria["value"];
+
+            ScannerCriteriaType criteriaType = ScanUtils::getCriteriaByName(name, !value.empty());
+
+            if (criteriaType == SCANNER_CRITERIA_NONE) {
+                printf("Invalid criteria type: %s, ignoring criteria.\n", name.c_str());
+                continue;
             }
-        };
 
-        fields.push_back(c);
+            void* valuePtr = ScanUtils::castAsPrimitiveType(value, primitive);
+
+            ScannerCriteria c = {
+                    .type = criteriaType,
+                    .value = valuePtr
+            };
+
+            printf("adding criteria: %d\n", c.type);
+            criteriaList.push_back(c);
+        }
+
+        fields.push_back({
+            .primitive = primitive,
+            .criterias = criteriaList
+        });
     }
 
     return fields;

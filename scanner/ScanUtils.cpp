@@ -2,35 +2,15 @@
 
 bool ScanUtils::matchesField(void *buffer, ScannerField field) {
     ScannerPrimitive primitive = field.primitive;
+    bool matches = true;
 
-    switch (primitive) {
-        case SCANNER_PRIMITIVE_UINT8:
-            return CriteriaMatcher<uint8_t>::numeric(*(uint8_t*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_UINT16:
-            return CriteriaMatcher<uint16_t>::numeric(*(uint16_t*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_UINT32:
-            return CriteriaMatcher<uint32_t>::numeric(*(uint32_t*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_UINT64:
-            return CriteriaMatcher<uint64_t>::numeric(*(uint64_t*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_INT8:
-            return CriteriaMatcher<int8_t>::numeric(*(int8_t*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_INT16:
-            return CriteriaMatcher<int16_t>::numeric(*(int16_t*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_INT32:
-            return CriteriaMatcher<int32_t>::numeric(*(int32_t*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_INT64:
-            return CriteriaMatcher<int64_t>::numeric(*(int64_t*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_FLOAT:
-            return CriteriaMatcher<float>::numeric(*(float*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_DOUBLE:
-            return CriteriaMatcher<double>::numeric(*(double*) buffer, field.criteria);
-        case SCANNER_PRIMITIVE_POINTER:
-            return false;
-        case SCANNER_PRIMITIVE_NONE:
-            break;
+    for (const auto& criteria : field.criterias) {
+        printf("checking criteria: %d\n", criteria.type);
+        matches &= ScanUtils::matchesCriteria(buffer, criteria, primitive);
+        if (!matches) break;
     }
 
-    return false;
+    return matches;
 }
 
 size_t ScanUtils::getPrimitiveSize(ScannerPrimitive primitive) {
@@ -103,5 +83,34 @@ void *ScanUtils::castAsPrimitiveType(const json& value, ScannerPrimitive primiti
     }
 
     return nullptr;
+}
+
+bool ScanUtils::matchesCriteria(void *buffer, ScannerCriteria criteria, ScannerPrimitive primitive) {
+    switch (primitive) {
+        case SCANNER_PRIMITIVE_UINT8:
+            return CriteriaMatcher<uint8_t>::numeric(*(uint8_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_UINT16:
+            return CriteriaMatcher<uint16_t>::numeric(*(uint16_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_UINT32:
+            return CriteriaMatcher<uint32_t>::numeric(*(uint32_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_UINT64:
+            return CriteriaMatcher<uint64_t>::numeric(*(uint64_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_INT8:
+            return CriteriaMatcher<int8_t>::numeric(*(int8_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_INT16:
+            return CriteriaMatcher<int16_t>::numeric(*(int16_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_INT32:
+            return CriteriaMatcher<int32_t>::numeric(*(int32_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_INT64:
+            return CriteriaMatcher<int64_t>::numeric(*(int64_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_FLOAT:
+            return CriteriaMatcher<float>::numeric(*(float*) buffer, criteria);
+        case SCANNER_PRIMITIVE_DOUBLE:
+            return CriteriaMatcher<double>::numeric(*(double*) buffer, criteria);
+        case SCANNER_PRIMITIVE_POINTER:
+            return false;
+        case SCANNER_PRIMITIVE_NONE:
+            break;
+    }
 }
 

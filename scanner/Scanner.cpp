@@ -31,7 +31,7 @@ std::vector<ScannerResult> Scanner::scan() {
     for (size_t i = 0; i < bufferSize - structureSize; i++) {
         size_t offset = 0;
 
-        for (auto field : fields) {
+        for (const auto& field : fields) {
             if (ScanUtils::matchesField(buffer + i + offset, field)) {
                 offset += ScanUtils::getPrimitiveSize(field.primitive);
             } else {

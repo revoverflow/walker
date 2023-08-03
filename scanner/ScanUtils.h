@@ -43,7 +43,7 @@ struct ScannerCriteria {
 
 struct ScannerField {
     ScannerPrimitive primitive;
-    ScannerCriteria criteria;
+    std::vector<ScannerCriteria> criterias;
 };
 
 struct ScannerResult {
@@ -111,6 +111,8 @@ public:
     static ScannerCriteriaType getCriteriaByName(const std::string& name, bool isValueSet);
 
     static void* castAsPrimitiveType(const json& value, ScannerPrimitive primitive);
+private:
+    static bool matchesCriteria(void* buffer, ScannerCriteria criteria, ScannerPrimitive primitive);
 };
 
 template<typename T>

@@ -1,27 +1,47 @@
 [
   {
     "type": "uint8",
-    "criteria": "=",
-    "value": 104
+    "criterias": [
+      {
+        "type": "eq",
+        "value": 104
+      }
+    ]
   },
   {
     "type": "uint8",
-    "criteria": "=",
-    "value": 101
+    "criterias": [
+      {
+        "type": "eq",
+        "value": 101
+      }
+    ]
   },
   {
     "type": "uint8",
-    "criteria": "=",
-    "value": 108
+    "criterias": [
+      {
+        "type": "eq",
+        "value": 108
+      }
+    ]
   },
   {
     "type": "uint8",
-    "criteria": "=",
-    "value": 108
+    "criterias": [
+      {
+        "type": "eq",
+        "value": 108
+      }
+    ]
   },
   {
     "type": "uint8",
-    "criteria": "=",
-    "value": 111
+    "criterias": [
+      {
+        "type": "eq",
+        "value": 111
+      }
+    ]
   }
 ]
