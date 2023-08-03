@@ -6,7 +6,7 @@
 #include "scanner/Scanner.h"
 #include "scanner/StructureParser.h"
 
-std::pair<long, char*> file_read(std::string filename) {
+std::pair<long, char*> file_read(const std::string& filename) {
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
@@ -17,7 +17,7 @@ std::pair<long, char*> file_read(std::string filename) {
     return std::pair<long, char*>{-1, nullptr};
 }
 
-void scan_file(const std::string& targetFilePath, std::string structureFilePath, std::string outputFilePath) {
+void scan_file(const std::string& targetFilePath, std::string structureFilePath, const std::string& outputFilePath) {
     Scanner scanner {};
     StructureParser structureParser {std::move(structureFilePath)};
     std::pair<long, char*> targetBuffer = file_read(targetFilePath);
