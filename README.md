@@ -67,3 +67,9 @@ To run this example, you can use the following command:
 ```bash
 walker -f example.bin -s example.json -o example_output.txt
 ```
+
+## Is this just pattern scanning?
+
+Pattern scanning is a common technique used in reverse engineering to find memory structures, it works by searching for a sequence of bytes. This is a very simple and fast technique, but it has a major drawback: it is very unreliable. It is very easy to get false positives when using pattern scanning, especially when the pattern is short.
+
+walker works the same, but adding criteria to the fields allows it to filter out false positives. This makes it much more reliable than pattern scanning and makes the offset finding process much faster when searching for complex structures.
