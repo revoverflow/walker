@@ -96,8 +96,6 @@ void *ScanUtils::castAsPrimitiveType(const json& value, ScannerPrimitive primiti
             return (void*) new float(value.get<float>());
         case SCANNER_PRIMITIVE_DOUBLE:
             return (void*) new double(value.get<double>());
-        case SCANNER_PRIMITIVE_STRING:
-            return (void*) new std::string(value.get<std::string>());
         case SCANNER_PRIMITIVE_POINTER:
             return (void*) new uintptr_t(value.get<uintptr_t>());
         case SCANNER_PRIMITIVE_NONE:
