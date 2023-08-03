@@ -25,6 +25,7 @@ typedef enum {
 
 typedef enum {
     SCANNER_CRITERIA_NONE,
+    SCANNER_CRITERIA_ANY,
     SCANNER_CRITERIA_EQUAL,
     SCANNER_CRITERIA_NOT_EQUAL,
     SCANNER_CRITERIA_GREATER_THAN,
@@ -88,13 +89,14 @@ const std::vector<std::tuple<ScannerPrimitive, size_t, std::string>> PRIM_DETAIL
 
 // Details about criteria
 const std::vector<std::tuple<ScannerCriteriaType, std::vector<std::string>, std::vector<ScannerPrimitive>, bool>> CRIT_DETAILS = {
-    { SCANNER_CRITERIA_EQUAL, { "equals", "=", "==", "===" }, NUMERIC_PRIMITIVES, true },
-    { SCANNER_CRITERIA_NOT_EQUAL, { "not_equals", "!=", "!==" }, NUMERIC_PRIMITIVES, true },
-    { SCANNER_CRITERIA_GREATER_THAN, { "greater_than", ">" }, NUMERIC_PRIMITIVES, true },
-    { SCANNER_CRITERIA_LESS_THAN, { "less_than", "<" }, NUMERIC_PRIMITIVES, true },
-    { SCANNER_CRITERIA_GREATER_THAN_OR_EQUAL, { "greater_than_or_equal", ">=" }, NUMERIC_PRIMITIVES, true },
-    { SCANNER_CRITERIA_LESS_THAN_OR_EQUAL, { "less_than_or_equal", "<=" }, NUMERIC_PRIMITIVES, true },
-    { SCANNER_CRITERIA_PTR_NOTNULL, { "ptr_not_null", "!nullptr", "!= nullptr" }, POINTER_PRIMITIVES, false },
+    { SCANNER_CRITERIA_ANY, { "any" }, {}, false },
+    { SCANNER_CRITERIA_EQUAL, { "equals", "eq", "=", "==", "===" }, NUMERIC_PRIMITIVES, true },
+    { SCANNER_CRITERIA_NOT_EQUAL, { "not_equals", "neq", "!=", "!==" }, NUMERIC_PRIMITIVES, true },
+    { SCANNER_CRITERIA_GREATER_THAN, { "greater_than", "gt", ">" }, NUMERIC_PRIMITIVES, true },
+    { SCANNER_CRITERIA_LESS_THAN, { "less_than", "lt", "<" }, NUMERIC_PRIMITIVES, true },
+    { SCANNER_CRITERIA_GREATER_THAN_OR_EQUAL, { "greater_than_or_equal", "gte", ">=" }, NUMERIC_PRIMITIVES, true },
+    { SCANNER_CRITERIA_LESS_THAN_OR_EQUAL, { "less_than_or_equal", "lte", "<=" }, NUMERIC_PRIMITIVES, true },
+    { SCANNER_CRITERIA_PTR_NOTNULL, { "ptr_not_null", "notnullptr", "!nullptr", "!= nullptr" }, POINTER_PRIMITIVES, false },
     { SCANNER_CRITERIA_PTR_NULL, { "ptr_null", "nullptr" }, POINTER_PRIMITIVES, false }
 };
 
@@ -127,6 +129,8 @@ struct CriteriaMatcher {
                 return value >= *(T*) criteria.value;
             case SCANNER_CRITERIA_LESS_THAN_OR_EQUAL:
                 return value <= *(T*) criteria.value;
+            case SCANNER_CRITERIA_ANY:
+                return true;
             default:
                 return false;
         }
@@ -140,6 +144,8 @@ struct CriteriaMatcher {
                 return value != nullptr;
             case SCANNER_CRITERIA_PTR_NULL:
                 return value == nullptr;
+            case SCANNER_CRITERIA_ANY:
+                return true;
             default:
                 return false;
         }
