@@ -10,7 +10,7 @@ Walker is a command line tool. It takes a binary file and a structure definition
 
 ### Structure definition file
 
-The structure definition file is a simple JSON file that defines the structure to search for. It consists of a list of fields, each of which has a type (primitive) and one or more criteria. The criteria are used to filter the results allowing it to find the right structure in a large binary file.
+The structure definition file is a simple JSON file that defines the structure to search for. It consists of a list of fields, each of which has a type (primitive) and one or more criterias. The criterias are used to filter the results allowing it to find the right structure in a large binary file.
 
 The following types are supported:
 - `uint8`, `uint16`, `uint32`, `uint64`: Unsigned integers of the given size
@@ -20,7 +20,7 @@ The following types are supported:
 - `pointer`: A pointer to another structure. The pointer size is determined by the architecture of the current machine (maybe this should be configurable in the future).
 - *More types will be added in the future...*
 
-The following criteria are supported:
+The following criterias are supported:
 - **Numeric fields**
   - `eq`: The field must be equal to the given value
   - `neq`: The field must not be equal to the given value
@@ -84,4 +84,4 @@ Releases are available on the [releases page](https://github.com/revoverflow/wal
 
 Pattern scanning is a common technique used in reverse engineering to find memory structures, it works by searching for a sequence of bytes. This is a very simple and fast technique, but it has a major drawback: it is very unreliable. It is very easy to get false positives when using pattern scanning, especially when the pattern is short.
 
-walker works the same, but adding criteria to the fields allows it to filter out false positives. This makes it much more reliable than pattern scanning and makes the offset finding process much faster when searching for complex structures.
+walker works the same, but adding criterias to the fields allows it to filter out false positives. This makes it much more reliable than pattern scanning and makes the offset finding process much faster when searching for complex structures.
