@@ -116,6 +116,7 @@ const std::vector<std::tuple<ScannerPrimitive, size_t, std::string, bool>> PRIM_
 };
 
 // Details about criteria
+// { criteria, names, supportedPrimitives, valueDynamic }
 const std::vector<std::tuple<ScannerCriteriaType, std::vector<std::string>, std::vector<ScannerPrimitive>, bool>> CRIT_DETAILS = {
     { SCANNER_CRITERIA_ANY, { "any" }, {}, false },
     { SCANNER_CRITERIA_EQUAL, { "equals", "eq", "=", "==", "===" }, EQ_SUPPORTED_PRIM, true },
