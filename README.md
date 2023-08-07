@@ -70,6 +70,10 @@ To run this example, you can use the following command:
 walker -f example.bin -s example.json -o example_output.txt
 ```
 
+## Releases
+
+Releases are available on the [releases page](https://github.com/revoverflow/walker/releases) and are automatically built for Linux using Travis CI. If you want to build it yourself, just clone the repository and run a cmake build.
+
 ## Is this just pattern scanning?
 
 Pattern scanning is a common technique used in reverse engineering to find memory structures, it works by searching for a sequence of bytes. This is a very simple and fast technique, but it has a major drawback: it is very unreliable. It is very easy to get false positives when using pattern scanning, especially when the pattern is short.
