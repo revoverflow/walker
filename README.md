@@ -1,5 +1,7 @@
 # 🚶 walker
 
+[![Build Status](https://app.travis-ci.com/revoverflow/walker.svg?branch=main)](https://app.travis-ci.com/revoverflow/walker)
+
 Walker is a simple and fast tool to search for memory structures in binary files such as memory dumps. It is written in C++ and is made to be as fast as possible while still being easy to use, portable and extensible.
 
 ## How to use
