@@ -10,6 +10,14 @@ addons:
     packages:
       - g++-7
 
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file: "walker"
+  skip_cleanup: true
+  on:
+    tags: true
+
 before_script:
   - mkdir build
   - cd build
