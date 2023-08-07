@@ -5,7 +5,7 @@ bool ScanUtils::matchesField(void *buffer, ScannerField field) {
     bool matches = true;
 
     for (const auto& criteria : field.criterias) {
-        matches &= ScanUtils::matchesCriteria(buffer, criteria, primitive);
+        matches &= ScanUtils::matchesCriteria(buffer, criteria, primitive, field.size);
         if (!matches) break;
     }
 
@@ -19,16 +19,20 @@ size_t ScanUtils::getPrimitiveSize(ScannerPrimitive primitive) {
 size_t ScanUtils::calculateStructureSize(const std::vector<ScannerField>& fields) {
     size_t size = 0;
 
-    for (ScannerField field : fields) {
-        size += getPrimitiveSize(field.primitive);
+    for (const ScannerField& field : fields) {
+        if(ScanUtils::isPrimitiveSizeSet(field.primitive)) {
+            size += field.size;
+        } else {
+            size += ScanUtils::getPrimitiveSize(field.primitive);
+        }
     }
 
     return size;
 }
 
-ScannerPrimitive ScanUtils::getPrimitiveByName(const std::string& name) {
+ScannerPrimitive ScanUtils::getPrimitiveByName(const std::string& name, bool isSizeSet) {
     for (const auto & i : PRIM_DETAILS) {
-        if (std::get<std::string>(i) == name) {
+        if (std::get<std::string>(i) == name && std::get<bool>(i) == isSizeSet) {
             return std::get<ScannerPrimitive>(i);
         }
     }
@@ -77,6 +81,8 @@ void *ScanUtils::castAsPrimitiveType(const json& value, ScannerPrimitive primiti
             return (void*) new double(value.get<double>());
         case SCANNER_PRIMITIVE_POINTER:
             return (void*) new uintptr_t(value.get<uintptr_t>());
+        case SCANNER_PRIMITIVE_BYTES:
+            return (void*) new std::string(value.get<std::string>());
         case SCANNER_PRIMITIVE_NONE:
             break;
     }
@@ -84,7 +90,7 @@ void *ScanUtils::castAsPrimitiveType(const json& value, ScannerPrimitive primiti
     return nullptr;
 }
 
-bool ScanUtils::matchesCriteria(void *buffer, ScannerCriteria criteria, ScannerPrimitive primitive) {
+bool ScanUtils::matchesCriteria(void *buffer, ScannerCriteria criteria, ScannerPrimitive primitive, size_t size) {
     switch (primitive) {
         case SCANNER_PRIMITIVE_UINT8:
             return CriteriaMatcher<uint8_t>::numeric(*(uint8_t*) buffer, criteria);
@@ -108,8 +114,67 @@ bool ScanUtils::matchesCriteria(void *buffer, ScannerCriteria criteria, ScannerP
             return CriteriaMatcher<double>::numeric(*(double*) buffer, criteria);
         case SCANNER_PRIMITIVE_POINTER:
             return CriteriaMatcher<uintptr_t>::pointer(*(uintptr_t*) buffer, criteria);
+        case SCANNER_PRIMITIVE_BYTES:
+            return CriteriaMatcher<void*>::bytes(buffer, criteria, size);
         case SCANNER_PRIMITIVE_NONE:
             break;
     }
+
+    return false;
+}
+
+bool ScanUtils::comparePattern(void *buffer, const std::string& pattern, size_t size) {
+    // This function is used to compare a buffer to a pattern, e.g. to check if a buffer matches a signature
+    // pattern is an IDA-style pattern, e.g. "A1 ? ? ? ? 8B 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    std::vector<std::string> tokens = ScanUtils::splitString(pattern, " ");
+    size_t patternSize = tokens.size();
+
+    if (patternSize != size) {
+        printf("Pattern size mismatch: %zu != %zu\n", patternSize, size);
+        return false;
+    }
+
+    for (size_t i = 0; i < patternSize; i++) {
+        std::string token = tokens[i];
+
+        if (token == "?" || token == "??") continue;
+        if (!ScanUtils::isHex(token) || token.size() > 2) return false;
+
+        auto byte = (uint8_t) std::stoi(token, nullptr, 16);
+        auto bufferByte = *(uint8_t*) ((uintptr_t) buffer + i);
+
+        if (byte != bufferByte) return false;
+    }
+
+    return true;
+}
+
+std::vector<std::string> ScanUtils::splitString(const std::string& str, const std::string& delimiter) {
+    std::vector<std::string> tokens;
+    std::string::size_type lastPos = 0, pos = 0;
+
+    while ((pos = str.find(delimiter, pos)) != std::string::npos) {
+        std::string token = str.substr(lastPos, pos - lastPos);
+        tokens.push_back(token);
+        lastPos = ++pos;
+    }
+
+    tokens.push_back(str.substr(lastPos, pos - lastPos));
+
+    return tokens;
+}
+
+bool ScanUtils::isHex(const std::string& str) {
+    return std::all_of(str.begin(), str.end(), ::isxdigit);
+}
+
+bool ScanUtils::isPrimitiveSizeSet(ScannerPrimitive primitive) {
+    for (const auto & i : PRIM_DETAILS) {
+        if (std::get<ScannerPrimitive>(i) == primitive) {
+            return std::get<bool>(i);
+        }
+    }
+
+    return false;
 }
 

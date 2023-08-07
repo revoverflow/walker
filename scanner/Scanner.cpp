@@ -33,7 +33,11 @@ std::vector<ScannerResult> Scanner::scan() {
 
         for (const auto& field : fields) {
             if (ScanUtils::matchesField(buffer + i + offset, field)) {
-                offset += ScanUtils::getPrimitiveSize(field.primitive);
+                if (ScanUtils::isPrimitiveSizeSet(field.primitive)) {
+                    offset += field.size;
+                } else {
+                    offset += ScanUtils::getPrimitiveSize(field.primitive);
+                }
             } else {
                 break;
             }

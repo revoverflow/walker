@@ -20,7 +20,8 @@ typedef enum {
     SCANNER_PRIMITIVE_INT64,
     SCANNER_PRIMITIVE_FLOAT,
     SCANNER_PRIMITIVE_DOUBLE,
-    SCANNER_PRIMITIVE_POINTER
+    SCANNER_PRIMITIVE_POINTER,
+    SCANNER_PRIMITIVE_BYTES
 } ScannerPrimitive;
 
 typedef enum {
@@ -33,7 +34,9 @@ typedef enum {
     SCANNER_CRITERIA_GREATER_THAN_OR_EQUAL,
     SCANNER_CRITERIA_LESS_THAN_OR_EQUAL,
     SCANNER_CRITERIA_PTR_NOTNULL,
-    SCANNER_CRITERIA_PTR_NULL
+    SCANNER_CRITERIA_PTR_NULL,
+    SCANNER_CRITERIA_BYTES_MATCH,
+    SCANNER_CRITERIA_BYTES_NOT_MATCH
 } ScannerCriteriaType;
 
 struct ScannerCriteria {
@@ -44,6 +47,7 @@ struct ScannerCriteria {
 struct ScannerField {
     ScannerPrimitive primitive;
     std::vector<ScannerCriteria> criterias;
+    size_t size = 0;
 };
 
 struct ScannerResult {
@@ -71,20 +75,27 @@ const std::vector<ScannerPrimitive> POINTER_PRIMITIVES = {
     SCANNER_PRIMITIVE_POINTER
 };
 
+// List of all supported bytes primitives
+const std::vector<ScannerPrimitive> BYTES_PRIMITIVES = {
+    SCANNER_PRIMITIVE_BYTES
+};
+
 // Details about each primitive
-const std::vector<std::tuple<ScannerPrimitive, size_t, std::string>> PRIM_DETAILS = {
-    { SCANNER_PRIMITIVE_NONE, 0, "none" },
-    { SCANNER_PRIMITIVE_UINT8, sizeof(uint8_t), "uint8" },
-    { SCANNER_PRIMITIVE_UINT16, sizeof(uint16_t), "uint16" },
-    { SCANNER_PRIMITIVE_UINT32, sizeof(uint32_t), "uint32" },
-    { SCANNER_PRIMITIVE_UINT64, sizeof(uint64_t), "uint64" },
-    { SCANNER_PRIMITIVE_INT8, sizeof(int8_t), "int8" },
-    { SCANNER_PRIMITIVE_INT16, sizeof(int16_t), "int16" },
-    { SCANNER_PRIMITIVE_INT32, sizeof(int32_t), "int32" },
-    { SCANNER_PRIMITIVE_INT64, sizeof(int64_t), "int64" },
-    { SCANNER_PRIMITIVE_FLOAT, sizeof(float), "float" },
-    { SCANNER_PRIMITIVE_DOUBLE, sizeof(double), "double" },
-    { SCANNER_PRIMITIVE_POINTER, sizeof(void*), "pointer" }
+// { primitive, size, name, sizeDynamic }
+const std::vector<std::tuple<ScannerPrimitive, size_t, std::string, bool>> PRIM_DETAILS = {
+    { SCANNER_PRIMITIVE_NONE, 0, "none", false },
+    { SCANNER_PRIMITIVE_UINT8, sizeof(uint8_t), "uint8", false },
+    { SCANNER_PRIMITIVE_UINT16, sizeof(uint16_t), "uint16", false },
+    { SCANNER_PRIMITIVE_UINT32, sizeof(uint32_t), "uint32", false },
+    { SCANNER_PRIMITIVE_UINT64, sizeof(uint64_t), "uint64", false },
+    { SCANNER_PRIMITIVE_INT8, sizeof(int8_t), "int8", false },
+    { SCANNER_PRIMITIVE_INT16, sizeof(int16_t), "int16", false },
+    { SCANNER_PRIMITIVE_INT32, sizeof(int32_t), "int32", false },
+    { SCANNER_PRIMITIVE_INT64, sizeof(int64_t), "int64", false },
+    { SCANNER_PRIMITIVE_FLOAT, sizeof(float), "float", false },
+    { SCANNER_PRIMITIVE_DOUBLE, sizeof(double), "double", false },
+    { SCANNER_PRIMITIVE_POINTER, sizeof(void*), "pointer", false },
+    { SCANNER_PRIMITIVE_BYTES, 0, "bytes", true }
 };
 
 // Details about criteria
@@ -97,8 +108,11 @@ const std::vector<std::tuple<ScannerCriteriaType, std::vector<std::string>, std:
     { SCANNER_CRITERIA_GREATER_THAN_OR_EQUAL, { "greater_than_or_equal", "gte", ">=" }, NUMERIC_PRIMITIVES, true },
     { SCANNER_CRITERIA_LESS_THAN_OR_EQUAL, { "less_than_or_equal", "lte", "<=" }, NUMERIC_PRIMITIVES, true },
     { SCANNER_CRITERIA_PTR_NOTNULL, { "ptr_not_null", "notnullptr", "!nullptr", "!= nullptr" }, POINTER_PRIMITIVES, false },
-    { SCANNER_CRITERIA_PTR_NULL, { "ptr_null", "nullptr" }, POINTER_PRIMITIVES, false }
+    { SCANNER_CRITERIA_PTR_NULL, { "ptr_null", "nullptr" }, POINTER_PRIMITIVES, false },
+    { SCANNER_CRITERIA_BYTES_MATCH, { "match", "pattern", "?" }, BYTES_PRIMITIVES, true },
+    { SCANNER_CRITERIA_BYTES_NOT_MATCH, { "not_match", "!pattern", "!?" }, BYTES_PRIMITIVES, true }
 };
+
 
 class ScanUtils {
 public:
@@ -107,12 +121,19 @@ public:
     static size_t getPrimitiveSize(ScannerPrimitive primitive);
     static size_t calculateStructureSize(const std::vector<ScannerField>& fields);
 
-    static ScannerPrimitive getPrimitiveByName(const std::string& name);
+    static ScannerPrimitive getPrimitiveByName(const std::string& name, bool isSizeSet);
     static ScannerCriteriaType getCriteriaByName(const std::string& name, bool isValueSet);
 
     static void* castAsPrimitiveType(const json& value, ScannerPrimitive primitive);
+
+    static bool comparePattern(void* buffer, const std::string& pattern, size_t maxSize);
+
+    static bool isPrimitiveSizeSet(ScannerPrimitive primitive);
+
 private:
-    static bool matchesCriteria(void* buffer, ScannerCriteria criteria, ScannerPrimitive primitive);
+    static bool matchesCriteria(void* buffer, ScannerCriteria criteria, ScannerPrimitive primitive, size_t size);
+    static std::vector<std::string> splitString(const std::string& str, const std::string& delimiter);
+    static bool isHex(const std::string& str);
 };
 
 template<typename T>
@@ -146,6 +167,19 @@ struct CriteriaMatcher {
                 return value != (T) nullptr;
             case SCANNER_CRITERIA_PTR_NULL:
                 return value == (T) nullptr;
+            case SCANNER_CRITERIA_ANY:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static bool bytes(T value, ScannerCriteria criteria, size_t size) {
+        switch (criteria.type) {
+            case SCANNER_CRITERIA_BYTES_MATCH:
+                return ScanUtils::comparePattern(value, *(std::string*) criteria.value, size);
+            case SCANNER_CRITERIA_BYTES_NOT_MATCH:
+                return !ScanUtils::comparePattern(value, *(std::string*) criteria.value, size);
             case SCANNER_CRITERIA_ANY:
                 return true;
             default:

@@ -24,6 +24,7 @@ std::vector<ScannerField> StructureParser::parse() {
         json field = it.value();
 
         std::string type = field["type"];
+        json size = field["size"];
         json criterias = field["criterias"];
 
         if (criterias.empty()) {
@@ -34,11 +35,10 @@ std::vector<ScannerField> StructureParser::parse() {
             continue;
         }
 
-
-        ScannerPrimitive primitive = ScanUtils::getPrimitiveByName(type);
+        ScannerPrimitive primitive = ScanUtils::getPrimitiveByName(type, !size.empty());
 
         if (primitive == SCANNER_PRIMITIVE_NONE) {
-            printf("Invalid primitive type: %s, ignoring field.\n", type.c_str());
+            printf("Invalid primitive type: %s, ignoring field. For primitives without size, make sure you specified the size attribute.\n", type.c_str());
             continue;
         }
 
@@ -70,9 +70,12 @@ std::vector<ScannerField> StructureParser::parse() {
 
         fields.push_back({
             .primitive = primitive,
-            .criterias = criteriaList
+            .criterias = criteriaList,
+            .size = size.empty() ? 0 : size.get<size_t>()
         });
     }
+
+    printf("Parsed %lu fields.\n", fields.size());
 
     return fields;
 }
