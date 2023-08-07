@@ -58,15 +58,9 @@ void Scanner::setFields(std::vector<ScannerField> inputFields) {
 void Scanner::saveResults(const std::vector<ScannerResult>& results, const std::string& filename) {
     std::ofstream file(filename, std::ios::binary);
 
-    file << "~ walker scan results ~" << std::endl;
-    file << "found " << results.size() << " results" << std::endl;
-    file << "------------------------" << std::endl;
-
     for (ScannerResult result : results) {
         file << "0x" << std::hex << result.offset << std::endl;
     }
-
-    file << "------------------------" << std::endl;
 
     file.close();
 }
