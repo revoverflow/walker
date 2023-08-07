@@ -17,6 +17,7 @@ The following types are supported:
 - `int8`, `int16`, `int32`, `int64`: Signed integers of the given size
 - `float` and `double`: Floating point numbers
 - `bytes` : A sequence of bytes of the given size
+- `string`: A sequence of characters of the given size
 - `pointer`: A pointer to another structure. The pointer size is determined by the architecture of the current machine (maybe this should be configurable in the future).
 - *More types will be added in the future...*
 
@@ -34,6 +35,9 @@ The following criterias are supported:
 - **Bytes fields**
   - `match`: The field must match the given pattern (IDA style)
   - `not_match`: The field must not match the given pattern (IDA style)
+- **String fields**
+  - `eq`: The field must be equal to the given string
+  - `neq`: The field must not be equal to the given string
 - `any`: The field can be any value
 
 ### Example

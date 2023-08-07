@@ -21,7 +21,8 @@ typedef enum {
     SCANNER_PRIMITIVE_FLOAT,
     SCANNER_PRIMITIVE_DOUBLE,
     SCANNER_PRIMITIVE_POINTER,
-    SCANNER_PRIMITIVE_BYTES
+    SCANNER_PRIMITIVE_BYTES,
+    SCANNER_PRIMITIVE_STRING
 } ScannerPrimitive;
 
 typedef enum {
@@ -80,6 +81,21 @@ const std::vector<ScannerPrimitive> BYTES_PRIMITIVES = {
     SCANNER_PRIMITIVE_BYTES
 };
 
+// Primitives that support the equal criteria
+const std::vector<ScannerPrimitive> EQ_SUPPORTED_PRIM = {
+        SCANNER_PRIMITIVE_UINT8,
+        SCANNER_PRIMITIVE_UINT16,
+        SCANNER_PRIMITIVE_UINT32,
+        SCANNER_PRIMITIVE_UINT64,
+        SCANNER_PRIMITIVE_INT8,
+        SCANNER_PRIMITIVE_INT16,
+        SCANNER_PRIMITIVE_INT32,
+        SCANNER_PRIMITIVE_INT64,
+        SCANNER_PRIMITIVE_FLOAT,
+        SCANNER_PRIMITIVE_DOUBLE,
+        SCANNER_PRIMITIVE_STRING
+};
+
 // Details about each primitive
 // { primitive, size, name, sizeDynamic }
 const std::vector<std::tuple<ScannerPrimitive, size_t, std::string, bool>> PRIM_DETAILS = {
@@ -95,14 +111,15 @@ const std::vector<std::tuple<ScannerPrimitive, size_t, std::string, bool>> PRIM_
     { SCANNER_PRIMITIVE_FLOAT, sizeof(float), "float", false },
     { SCANNER_PRIMITIVE_DOUBLE, sizeof(double), "double", false },
     { SCANNER_PRIMITIVE_POINTER, sizeof(void*), "pointer", false },
-    { SCANNER_PRIMITIVE_BYTES, 0, "bytes", true }
+    { SCANNER_PRIMITIVE_BYTES, 0, "bytes", true },
+    { SCANNER_PRIMITIVE_STRING, 0, "string", true }
 };
 
 // Details about criteria
 const std::vector<std::tuple<ScannerCriteriaType, std::vector<std::string>, std::vector<ScannerPrimitive>, bool>> CRIT_DETAILS = {
     { SCANNER_CRITERIA_ANY, { "any" }, {}, false },
-    { SCANNER_CRITERIA_EQUAL, { "equals", "eq", "=", "==", "===" }, NUMERIC_PRIMITIVES, true },
-    { SCANNER_CRITERIA_NOT_EQUAL, { "not_equals", "neq", "!=", "!==" }, NUMERIC_PRIMITIVES, true },
+    { SCANNER_CRITERIA_EQUAL, { "equals", "eq", "=", "==", "===" }, EQ_SUPPORTED_PRIM, true },
+    { SCANNER_CRITERIA_NOT_EQUAL, { "not_equals", "neq", "!=", "!==" }, EQ_SUPPORTED_PRIM, true },
     { SCANNER_CRITERIA_GREATER_THAN, { "greater_than", "gt", ">" }, NUMERIC_PRIMITIVES, true },
     { SCANNER_CRITERIA_LESS_THAN, { "less_than", "lt", "<" }, NUMERIC_PRIMITIVES, true },
     { SCANNER_CRITERIA_GREATER_THAN_OR_EQUAL, { "greater_than_or_equal", "gte", ">=" }, NUMERIC_PRIMITIVES, true },
@@ -180,6 +197,19 @@ struct CriteriaMatcher {
                 return ScanUtils::comparePattern(value, *(std::string*) criteria.value, size);
             case SCANNER_CRITERIA_BYTES_NOT_MATCH:
                 return !ScanUtils::comparePattern(value, *(std::string*) criteria.value, size);
+            case SCANNER_CRITERIA_ANY:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static bool string(T value, ScannerCriteria criteria, size_t size) {
+        switch (criteria.type) {
+            case SCANNER_CRITERIA_EQUAL:
+                return memcmp(value, criteria.value, size) == 0;
+            case SCANNER_CRITERIA_NOT_EQUAL:
+                return memcmp(value, criteria.value, size) != 0;
             case SCANNER_CRITERIA_ANY:
                 return true;
             default:

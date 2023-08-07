@@ -83,6 +83,11 @@ void *ScanUtils::castAsPrimitiveType(const json& value, ScannerPrimitive primiti
             return (void*) new uintptr_t(value.get<uintptr_t>());
         case SCANNER_PRIMITIVE_BYTES:
             return (void*) new std::string(value.get<std::string>());
+        case SCANNER_PRIMITIVE_STRING: {
+            char *str = new char[value.get<std::string>().length() + 1];
+            strcpy(str, value.get<std::string>().c_str());
+            return (char *) str;
+        }
         case SCANNER_PRIMITIVE_NONE:
             break;
     }
@@ -116,6 +121,9 @@ bool ScanUtils::matchesCriteria(void *buffer, ScannerCriteria criteria, ScannerP
             return CriteriaMatcher<uintptr_t>::pointer(*(uintptr_t*) buffer, criteria);
         case SCANNER_PRIMITIVE_BYTES:
             return CriteriaMatcher<void*>::bytes(buffer, criteria, size);
+        case SCANNER_PRIMITIVE_STRING: {
+            return CriteriaMatcher<char *>::string((char *) buffer, criteria, size);
+        }
         case SCANNER_PRIMITIVE_NONE:
             break;
     }
